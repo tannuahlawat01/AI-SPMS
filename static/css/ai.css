@@ -1,0 +1,27 @@
+/* Phase 4: AI generator page */
+.ai-form-card { max-width: 760px; }
+.ai-warn { background: #fef3c7; color: #92400e; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; }
+.ai-warn code { background: rgba(0,0,0,.08); padding: 1px 6px; border-radius: 4px; }
+.ai-error { background: #fee2e2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: 500; }
+.ai-error a { color: #991b1b; text-decoration: underline; margin-left: 6px; }
+
+.ai-bar { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin: 24px 0 12px; }
+
+.ai-card { display: flex; gap: 14px; align-items: flex-start; background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.06); border-left: 5px solid #d1d5db; }
+.ai-card.accepted { border-left-color: var(--ok); background: #f0fdf4; }
+.ai-card.rejected { opacity: .5; border-left-color: var(--err); }
+.ai-num { flex: none; width: 30px; height: 30px; border-radius: 50%; background: #e0e7ff; color: #3730a3; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.ai-body { flex: 1; min-width: 0; }
+.ai-body p { margin: 4px 0 8px; color: var(--muted); }
+.ai-meta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--muted); }
+.ai-actions { display: flex; flex-direction: column; gap: 6px; }
+
+.ai-edit label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.ai-edit input, .ai-edit select, .ai-edit textarea { width: 100%; margin-top: 4px; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; font: inherit; }
+.ai-edit .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+@media (max-width: 760px) {
+  .ai-card { flex-wrap: wrap; }
+  .ai-actions { flex-direction: row; width: 100%; }
+  .ai-edit .row3 { grid-template-columns: 1fr; }
+}

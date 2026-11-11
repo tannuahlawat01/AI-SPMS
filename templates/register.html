@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Register | AI-SPMS{% endblock %}
+{% block public %}
+<div class="auth-card">
+  <h2>Create your account</h2>
+  <form method="POST" id="reg-form" novalidate>
+    <label>Full name
+      <input type="text" name="full_name" value="{{ name or '' }}" required>
+    </label>
+    <label>Email
+      <input type="email" name="email" value="{{ email or '' }}" required>
+    </label>
+    <label>Role
+      <select name="role" required>
+        <option value="" disabled {{ 'selected' if not role }}>Select role</option>
+        {% for r in roles %}
+          <option value="{{ r }}" {{ 'selected' if role == r }}>{{ r }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Password
+      <input type="password" name="password" minlength="6" required>
+    </label>
+    <label>Confirm password
+      <input type="password" name="confirm" required>
+    </label>
+    <button class="btn btn-primary btn-block">Register</button>
+  </form>
+  <p class="muted">Already registered? <a href="{{ url_for('login') }}">Log in</a></p>
+</div>
+{% endblock %}

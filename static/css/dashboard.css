@@ -1,0 +1,30 @@
+/* Phase 5: dashboard */
+.stats .card { margin-bottom: 0; }
+.stat .num.ok { color: var(--ok); }
+.stat .num.warn { color: #d97706; }
+.stat .num.bad { color: var(--err); }
+
+.c-top { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; font-weight: 600; }
+.overall .progress { height: 16px; margin: 8px 0; }
+.progress .bar.blue { background: var(--primary); }
+.contrib { margin-bottom: 14px; }
+
+.dash-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 18px; }
+.dash-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+
+/* Donut chart (pure CSS; JS sets the gradient) */
+.donut-wrap { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; margin-top: 12px; }
+.donut { position: relative; width: 170px; height: 170px; border-radius: 50%; background: #e5e7eb; flex: none; }
+.donut::after { content: ""; position: absolute; inset: 26px; background: #fff; border-radius: 50%; }
+.donut-center { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; }
+
+.legend { list-style: none; }
+.legend li { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 14px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.dot.done { background: #16a34a; }
+.dot.doing { background: #f59e0b; }
+.dot.todo { background: #9ca3af; }
+
+@media (max-width: 760px) {
+  .dash-grid, .dash-grid2 { grid-template-columns: 1fr; }
+}

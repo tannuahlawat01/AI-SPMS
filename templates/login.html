@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Login | AI-SPMS{% endblock %}
+{% block public %}
+<div class="auth-card">
+  <h2>Welcome back</h2>
+  <form method="POST">
+    <label>Email
+      <input type="email" name="email" value="{{ email or '' }}" required>
+    </label>
+    <label>Password
+      <input type="password" name="password" required>
+    </label>
+    <button class="btn btn-primary btn-block">Login</button>
+  </form>
+  <p class="muted">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit' if mode == 'edit' else 'Create' }} Project | AI-SPMS{% endblock %}
+{% block content %}
+<h1>{{ 'Edit Project' if mode == 'edit' else 'Create Project' }}</h1>
+<p class="muted">Fields marked * are required.</p>
+
+<div class="card form-card">
+  <form method="POST" id="proj-form" novalidate>
+    <label>Project title *
+      <input type="text" name="title" maxlength="100" value="{{ f.title or '' }}" required>
+    </label>
+    <label>Description
+      <textarea name="description" rows="4"
+        placeholder="What is the project about? (Helps the AI in Phase 4)">{{ f.description or '' }}</textarea>
+    </label>
+    <label>Technology stack * (comma separated)
+      <input type="text" name="tech_stack" placeholder="Python, Flask, SQLite"
+             value="{{ f.tech_stack or '' }}" required>
+    </label>
+    <div class="row2">
+      <label>Start date *
+        <input type="date" name="start_date" value="{{ f.start_date or '' }}" required>
+      </label>
+      <label>Deadline *
+        <input type="date" name="end_date" value="{{ f.end_date or '' }}" required>
+      </label>
+    </div>
+    <button class="btn btn-primary">{{ 'Save Changes' if mode == 'edit' else 'Create Project' }}</button>
+    <a href="{{ url_for('project_details', pid=pid) if mode == 'edit' else url_for('projects') }}"
+       class="btn btn-light">Cancel</a>
+  </form>
+</div>
+{% endblock %}

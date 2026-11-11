@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}My Projects | AI-SPMS{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>My Projects</h1>
+    <p class="muted">Projects you own or have joined.</p>
+  </div>
+  <a href="{{ url_for('create_project') }}" class="btn btn-primary">➕ New Project</a>
+</div>
+
+{% if projects %}
+<div class="grid">
+  {% for p in projects %}
+  {% set pct = (p.done * 100 // p.total) if p.total else 0 %}
+  <div class="card project-card">
+    <div class="card-top">
+      <h3><a href="{{ url_for('project_details', pid=p.project_id) }}">{{ p.title }}</a></h3>
+      {% if p.created_by == session.user_id %}<span class="badge owner">Owner</span>{% endif %}
+    </div>
+    <p class="muted clamp">{{ p.description or 'No description.' }}</p>
+    <div class="chips">
+      {% for t in p.tech_stack.split(',') %}
+        {% if t.strip() %}<span class="chip">{{ t.strip() }}</span>{% endif %}
+      {% endfor %}
+    </div>
+    <div class="progress"><div class="bar" data-w="{{ pct }}"></div></div>
+    <div class="meta">
+      <span>{{ pct }}% done ({{ p.done }}/{{ p.total }} tasks)</span>
+      <span>👥 {{ p.members }}</span>
+    </div>
+    <div class="meta"><span>Due {{ p.end_date }}</span></div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card empty">
+  <h3>No projects yet</h3>
+  <p class="muted">Create a project to start planning your work.</p>
+  <a href="{{ url_for('create_project') }}" class="btn btn-primary">Create Project</a>
+</div>
+{% endif %}
+{% endblock %}

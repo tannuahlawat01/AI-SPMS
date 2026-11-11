@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}{{ p.title }} | AI-SPMS{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ p.title }}</h1>
+    <p class="muted">{{ p.start_date }} → {{ p.end_date }}
+      {% if days_left < 0 %}
+        · <span class="late">Overdue by {{ -days_left }} day(s)</span>
+      {% else %}
+        · {{ days_left }} day(s) left
+      {% endif %}
+    </p>
+  </div>
+  <div class="actions">
+    <a href="{{ url_for('tasks', pid=p.project_id) }}" class="btn btn-light">✅ Tasks</a>
+    <a href="{{ url_for('team', pid=p.project_id) }}" class="btn btn-light">👥 Team</a>
+    {% if is_owner %}
+    <a href="{{ url_for('edit_project', pid=p.project_id) }}" class="btn btn-light">✏️ Edit</a>
+    <form method="POST" action="{{ url_for('delete_project', pid=p.project_id) }}"
+          data-msg="Delete this project and all its tasks? This cannot be undone.">
+      <button class="btn btn-danger">🗑 Delete</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div class="card">
+    <h3>About</h3>
+    <p>{{ p.description or 'No description added.' }}</p>
+    <h4>Tech stack</h4>
+    <div class="chips">
+      {% for t in p.tech_stack.split(',') %}
+        {% if t.strip() %}<span class="chip">{{ t.strip() }}</span>{% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Progress</h3>
+    <div class="progress"><div class="bar" data-w="{{ pct }}"></div></div>
+    <p><strong>{{ pct }}%</strong> complete</p>
+    <p class="muted">{{ st.total }} tasks · {{ st.done }} completed · {{ st.doing }} in progress</p>
+    {% if st.total == 0 %}
+      <p class="muted">No tasks yet.
+        {% if is_owner %}<a href="{{ url_for('create_task', pid=p.project_id) }}">Add the first task →</a>{% endif %}
+      </p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <h3>Team ({{ members|length }})</h3>
+  <table class="table">
+    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Joined</th></tr></thead>
+    <tbody>
+      {% for m in members %}
+      <tr>
+        <td>{{ m.full_name }}</td><td>{{ m.email }}</td>
+        <td><span class="badge owner">{{ m.role_in_project }}</span></td>
+        <td>{{ m.joined_at[:10] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<p><a href="{{ url_for('projects') }}">← Back to projects</a></p>
+{% endblock %}

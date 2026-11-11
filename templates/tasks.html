@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Tasks | AI-SPMS{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Task Management</h1>
+    <p class="muted">
+      {% if p %}Tasks in <strong>{{ p.title }}</strong>{% else %}Tasks across all your projects. Pick a project to add tasks.{% endif %}
+    </p>
+  </div>
+  {% if p and p.created_by == session.user_id %}
+    <a href="{{ url_for('create_task', pid=p.project_id) }}" class="btn btn-primary">➕ Add Task</a>
+  {% endif %}
+</div>
+
+<form method="GET" class="card filters">
+  <label>Project
+    <select name="pid">
+      <option value="">All projects</option>
+      {% for pl in plist %}
+        <option value="{{ pl.project_id }}" {{ 'selected' if pid == pl.project_id }}>{{ pl.title }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Status
+    <select name="status">
+      <option value="">Any</option>
+      {% for s in statuses %}
+        <option value="{{ s }}" {{ 'selected' if status == s }}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="check">
+    <input type="checkbox" name="mine" value="1" {{ 'checked' if mine }}> My tasks only
+  </label>
+  <button class="btn btn-primary btn-sm">Filter</button>
+  <a href="{{ url_for('tasks') }}" class="btn btn-light btn-sm">Reset</a>
+</form>
+
+{% if tasks %}
+<div class="card table-wrap">
+  <table class="table">
+    <thead>
+      <tr><th>Task</th><th>Project</th><th>Assigned to</th><th>Priority</th><th>Deadline</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for t in tasks %}
+      {% set can_edit = t.owner_id == session.user_id %}
+      {% set can_status = can_edit or t.assigned_to == session.user_id %}
+      <tr>
+        <td>
+          <strong>{{ t.task_title }}</strong>
+          {% if t.is_ai_gen %}<span class="badge ai">AI</span>{% endif %}
+          {% if t.task_desc %}<div class="muted small">{{ t.task_desc }}</div>{% endif %}
+          {% if t.est_days %}<div class="muted small">~{{ t.est_days }} day(s)</div>{% endif %}
+        </td>
+        <td>{{ t.ptitle }}</td>
+        <td>{{ t.who or 'Unassigned' }}</td>
+        <td><span class="badge pri-{{ t.priority|lower }}">{{ t.priority }}</span></td>
+        <td>
+          {% if t.deadline %}
+            <span class="{{ 'late' if t.deadline < today and t.status != 'Completed' }}">{{ t.deadline }}</span>
+          {% else %}—{% endif %}
+        </td>
+        <td>
+          {% if can_status %}
+          <form method="POST" action="{{ url_for('task_status', tid=t.task_id) }}" class="inline">
+            <select name="status" class="status-sel st-{{ t.status|lower }}">
+              {% for s in statuses %}
+                <option value="{{ s }}" {{ 'selected' if t.status == s }}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </form>
+          {% else %}
+            <span class="badge st-{{ t.status|lower }}">{{ t.status }}</span>
+          {% endif %}
+        </td>
+        <td class="row-actions">
+          {% if can_edit %}
+            <a href="{{ url_for('edit_task', tid=t.task_id) }}" class="btn btn-light btn-sm">Edit</a>
+            <form method="POST" action="{{ url_for('delete_task', tid=t.task_id) }}" class="inline"
+                  data-msg="Delete this task?">
+              <button class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card empty">
+  <h3>No tasks found</h3>
+  <p class="muted">Try changing the filters{% if p and p.created_by == session.user_id %} or add a task to this project{% endif %}.</p>
+</div>
+{% endif %}
+{% endblock %}

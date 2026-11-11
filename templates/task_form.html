@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Edit' if mode == 'edit' else 'New' }} Task | AI-SPMS{% endblock %}
+{% block content %}
+<h1>{{ 'Edit Task' if mode == 'edit' else 'New Task' }}</h1>
+<p class="muted">Project: <strong>{{ p.title }}</strong> ({{ p.start_date }} → {{ p.end_date }})</p>
+
+<div class="card form-card">
+  <form method="POST" novalidate>
+    <label>Task title *
+      <input type="text" name="task_title" maxlength="120" value="{{ f.task_title or '' }}" required>
+    </label>
+    <label>Description
+      <textarea name="task_desc" rows="3">{{ f.task_desc or '' }}</textarea>
+    </label>
+
+    <div class="row2">
+      <label>Assign to
+        <select name="assigned_to">
+          <option value="">Unassigned</option>
+          {% for m in members %}
+            <option value="{{ m.user_id }}" {{ 'selected' if (f.assigned_to|string) == (m.user_id|string) }}>
+              {{ m.full_name }} ({{ m.role_in_project }})
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Priority
+        <select name="priority">
+          {% for pr in priorities %}
+            <option value="{{ pr }}" {{ 'selected' if f.priority == pr }}>{{ pr }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+
+    <div class="row2">
+      <label>Status
+        <select name="status">
+          {% for s in statuses %}
+            <option value="{{ s }}" {{ 'selected' if f.status == s }}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Estimated days
+        <input type="number" name="est_days" min="1" max="365" value="{{ f.est_days or '' }}">
+      </label>
+    </div>
+
+    <label>Deadline
+      <input type="date" name="deadline" value="{{ f.deadline or '' }}">
+    </label>
+
+    <button class="btn btn-primary">{{ 'Save Changes' if mode == 'edit' else 'Create Task' }}</button>
+    <a href="{{ url_for('tasks', pid=p.project_id) }}" class="btn btn-light">Cancel</a>
+  </form>
+</div>
+{% endblock %}

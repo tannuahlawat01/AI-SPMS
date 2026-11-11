@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Team | AI-SPMS{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Team Management</h1>
+    <p class="muted">Add members to a project and see how much each one has on their plate.</p>
+  </div>
+</div>
+
+{% if plist %}
+<form method="GET" class="card filters">
+  <label>Project
+    <select name="pid">
+      {% for pl in plist %}
+        <option value="{{ pl.project_id }}" {{ 'selected' if pl.project_id == pid }}>{{ pl.title }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <button class="btn btn-primary btn-sm">Open</button>
+</form>
+
+{% if is_owner %}
+<div class="card">
+  <h3>Add a member</h3>
+  <p class="muted">The person must already have an AI-SPMS account.</p>
+  <form method="POST" action="{{ url_for('add_member', pid=p.project_id) }}" class="filters">
+    <label>Email
+      <input type="email" name="email" placeholder="friend@college.edu" required>
+    </label>
+    <label>Role in project
+      <select name="role_in_project">
+        {% for r in roles %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+      </select>
+    </label>
+    <button class="btn btn-primary btn-sm">Add</button>
+  </form>
+</div>
+{% else %}
+<p class="muted">Only the project owner can add or remove members.</p>
+{% endif %}
+
+<div class="card table-wrap">
+  <h3>{{ p.title }} · {{ members|length }} member(s)</h3>
+  <table class="table">
+    <thead>
+      <tr><th>Name</th><th>Email</th><th>Role</th><th>Tasks done</th><th>Joined</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for m in members %}
+      {% set c = counts.get(m.user_id) %}
+      <tr>
+        <td>{{ m.full_name }}{% if m.user_id == session.user_id %} <span class="muted small">(you)</span>{% endif %}</td>
+        <td>{{ m.email }}</td>
+        <td><span class="badge owner">{{ m.role_in_project }}</span></td>
+        <td>{{ c.done if c else 0 }} / {{ c.total if c else 0 }}</td>
+        <td>{{ m.joined_at[:10] }}</td>
+        <td>
+          {% if is_owner and m.user_id != p.created_by %}
+          <form method="POST" class="inline"
+                action="{{ url_for('remove_member', pid=p.project_id, uid=m.user_id) }}"
+                data-msg="Remove {{ m.full_name }}? Their tasks will become unassigned.">
+            <button class="btn btn-danger btn-sm">Remove</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card empty">
+  <h3>No projects yet</h3>
+  <p class="muted">Create a project first, then build your team.</p>
+  <a href="{{ url_for('create_project') }}" class="btn btn-primary">Create Project</a>
+</div>
+{% endif %}
+{% endblock %}

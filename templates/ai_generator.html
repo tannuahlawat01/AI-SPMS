@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}AI Task Generator | AI-SPMS{% endblock %}
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/ai.css') }}">
+{% endblock %}
+{% block content %}
+<h1>🤖 AI Task Generator</h1>
+<p class="muted">Describe your project and the AI will suggest an ordered task plan with priorities and deadlines. You decide what gets saved.</p>
+
+{% if not key_ok %}
+<div class="ai-warn">
+  AI is not configured yet: add <code>GROQ_API_KEY</code> to your <code>.env</code> file and restart the server.
+  You can still add tasks manually from the Tasks page.
+</div>
+{% endif %}
+
+{% if plist %}
+<div class="card ai-form-card">
+  <form id="ai-form" novalidate>
+    <label>Project (accepted tasks are saved here) *
+      <select id="ai-project">
+        <option value="">Select a project</option>
+        {% for p in plist %}
+        <option value="{{ p.project_id }}"
+                data-title="{{ p.title }}"
+                data-desc="{{ p.description or '' }}"
+                data-stack="{{ p.tech_stack }}"
+                data-end="{{ p.end_date }}"
+                {{ 'selected' if pid == p.project_id }}>{{ p.title }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Project title *
+      <input type="text" id="ai-title" maxlength="100">
+    </label>
+    <label>Project description or idea
+      <textarea id="ai-desc" rows="4" placeholder="What should the project do? The more detail, the better the tasks."></textarea>
+    </label>
+    <div class="row2">
+      <label>Technology stack *
+        <input type="text" id="ai-stack" placeholder="Python, Flask, SQLite">
+      </label>
+      <label>Deadline *
+        <input type="date" id="ai-end">
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary" id="ai-go">✨ Generate Tasks</button>
+  </form>
+</div>
+
+<div id="ai-error" class="ai-error" hidden></div>
+
+<section id="ai-results" hidden>
+  <div class="ai-bar">
+    <div>
+      <h3>Suggested tasks <span id="ai-count"></span></h3>
+      <p class="muted">Nothing is saved until you click Save. Accept, edit or reject each suggestion.</p>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn btn-light btn-sm" id="ai-accept-all">Accept all</button>
+      <button type="button" class="btn btn-primary" id="ai-save" disabled>Save accepted (0)</button>
+    </div>
+  </div>
+  <div id="ai-list"></div>
+</section>
+
+{% else %}
+<div class="card empty">
+  <h3>No projects you own</h3>
+  <p class="muted">Create a project first. The AI plans tasks for projects you own.</p>
+  <a href="{{ url_for('create_project') }}" class="btn btn-primary">Create Project</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/ai.js') }}"></script>
+{% endblock %}

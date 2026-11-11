@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | AI-SPMS{% endblock %}
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Hello, {{ session.name }} 👋</h1>
+    <p class="muted">{{ session.role }} · {{ ('Project: ' ~ p.title) if p else 'All your projects' }}</p>
+  </div>
+  {% if plist %}
+  <form method="GET" class="filters">
+    <label>View
+      <select name="pid">
+        <option value="">All projects</option>
+        {% for pl in plist %}
+          <option value="{{ pl.project_id }}" {{ 'selected' if pid == pl.project_id }}>{{ pl.title }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button class="btn btn-primary btn-sm">Apply</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if n_projects == 0 %}
+<div class="card empty">
+  <h3>Welcome! Let's set up your first project</h3>
+  <p class="muted">Create a project, add your team, then let the AI plan the tasks.</p>
+  <a href="{{ url_for('create_project') }}" class="btn btn-primary">Create Project</a>
+</div>
+{% else %}
+
+<div class="stats">
+  <div class="card stat"><div class="num">{{ n_projects }}</div><div>Projects</div></div>
+  <div class="card stat"><div class="num">{{ st.total }}</div><div>Total tasks</div></div>
+  <div class="card stat"><div class="num ok">{{ st.done }}</div><div>Completed</div></div>
+  <div class="card stat"><div class="num warn">{{ st.doing }}</div><div>In progress</div></div>
+  <div class="card stat"><div class="num">{{ st.todo }}</div><div>Pending (To-Do)</div></div>
+  <div class="card stat"><div class="num bad">{{ st.late }}</div><div>Overdue</div></div>
+</div>
+
+<div class="card overall">
+  <div class="c-top"><span>Overall completion</span><span>{{ pct }}%</span></div>
+  <div class="progress"><div class="bar" data-w="{{ pct }}"></div></div>
+  <p class="muted small">{{ st.done }} of {{ st.total }} tasks completed (completed ÷ total × 100)</p>
+</div>
+
+<div class="dash-grid">
+  <div class="card">
+    <h3>Task status</h3>
+    <div class="donut-wrap">
+      <div class="donut" id="donut"
+           data-done="{{ st.done }}" data-doing="{{ st.doing }}" data-todo="{{ st.todo }}">
+        <div class="donut-center">{{ pct }}%</div>
+      </div>
+      <ul class="legend">
+        <li><span class="dot done"></span>Completed: {{ st.done }}</li>
+        <li><span class="dot doing"></span>In progress: {{ st.doing }}</li>
+        <li><span class="dot todo"></span>To-Do: {{ st.todo }}</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Member contributions</h3>
+    {% if contrib %}
+      {% for c in contrib %}
+      <div class="contrib">
+        <div class="c-top"><span>{{ c.name }}</span><span>{{ c.pct }}%</span></div>
+        <div class="progress"><div class="bar blue" data-w="{{ c.pct }}"></div></div>
+        <div class="muted small">
+          {{ c.done }} completed{% if c.assigned is not none %} of {{ c.assigned }} assigned{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      <p class="muted small">Contribution = tasks completed by the member ÷ all completed tasks × 100 (rounded).</p>
+    {% else %}
+      <p class="muted">No tasks assigned yet. Assign tasks to your team to see contributions.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% if prog %}
+<div class="card">
+  <h3>Project progress</h3>
+  {% for r in prog %}
+  <div class="contrib">
+    <div class="c-top">
+      <a href="{{ url_for('project_details', pid=r.project_id) }}">{{ r.title }}</a>
+      <span>{{ r.pct }}%</span>
+    </div>
+    <div class="progress"><div class="bar" data-w="{{ r.pct }}"></div></div>
+    <div class="muted small">{{ r.done }}/{{ r.total }} tasks · due {{ r.end_date }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="dash-grid2">
+  <div class="card table-wrap">
+    <h3>⏰ Upcoming deadlines (next 14 days)</h3>
+    {% if upcoming %}
+    <table class="table">
+      <thead><tr><th>Task</th><th>Assigned to</th><th>Due</th></tr></thead>
+      <tbody>
+        {% for r in upcoming %}
+        <tr>
+          <td><a href="{{ url_for('tasks', pid=r.project_id) }}">{{ r.task_title }}</a>
+              <div class="muted small">{{ r.ptitle }}</div></td>
+          <td>{{ r.who or 'Unassigned' }}</td>
+          <td>{{ r.deadline }}
+            <div class="muted small">
+              {% if r.days == 0 %}Today{% elif r.days == 1 %}Tomorrow{% else %}in {{ r.days }} days{% endif %}
+            </div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p class="muted">Nothing due in the next 14 days. 🎉</p>
+    {% endif %}
+  </div>
+
+  <div class="card table-wrap">
+    <h3>🚨 Overdue tasks</h3>
+    {% if overdue %}
+    <table class="table">
+      <thead><tr><th>Task</th><th>Assigned to</th><th>Was due</th></tr></thead>
+      <tbody>
+        {% for r in overdue %}
+        <tr>
+          <td><a href="{{ url_for('tasks', pid=r.project_id) }}">{{ r.task_title }}</a>
+              <div class="muted small">{{ r.ptitle }}</div></td>
+          <td>{{ r.who or 'Unassigned' }}</td>
+          <td><span class="late">{{ r.deadline }}</span>
+            <div class="muted small">{{ -r.days }} day(s) overdue</div></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <p class="muted">No overdue tasks. Nice work!</p>
+    {% endif %}
+  </div>
+</div>
+
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
